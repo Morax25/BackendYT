@@ -1,1 +1,1 @@
-export const DB_NAME = "YTDATABASE";
+export const DB_NAME = 'YTDATABASE';
