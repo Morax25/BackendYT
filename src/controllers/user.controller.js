@@ -3,6 +3,7 @@ import ApiError from '../utils/ApiError.js';
 import { User } from '../models/user.model.js';
 import uploadOnCloudinary from '../utils/cloudinary.js';
 import ApiResponse from '../utils/ApiResponse.js';
+import fs from "fs"
 
 export const registerUser = asyncHandler(async (req, res) => {
   const { fullName, email, username, password } = req.body;
@@ -14,8 +15,10 @@ export const registerUser = asyncHandler(async (req, res) => {
   const existingUser = await User.findOne({
     $or: [{ email }, { username }],
   });
+
   if (existingUser) {
-    throw new ApiError(409, 'User already exists');
+    fs.unlinkSync(req.files.avatar[0].path)
+    throw new ApiError(409, 'User already exists')
   }
 
   
@@ -26,8 +29,6 @@ export const registerUser = asyncHandler(async (req, res) => {
   }
   const avatar = await uploadOnCloudinary(avatarLocalPath);
   const cover = await uploadOnCloudinary(coverImageLocalPath);
-
-  console.log("this is generated file path",avatar)
   
   if (!avatar) {
     throw new ApiError(400, 'avatar is required');
