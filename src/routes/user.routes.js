@@ -7,11 +7,12 @@ import {
 } from '../controllers/user.controller.js';
 import upload from '../middlewares/multer.middleware.js';
 import { verifyJWT } from '../middlewares/auth.middleware.js';
+import {validateRequest,userRegistrationSchema} from '../validators/user.validator.js'
 
 const router = Router();
 
 router.post(
-  '/register',
+  '/register', validateRequest(userRegistrationSchema),
   upload.fields([
     {
       name: 'avatar',
