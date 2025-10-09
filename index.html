@@ -11,18 +11,11 @@
 
 </body>
 <script>
-    const signUp = async () => {
-        response = 400
-       return new Promise((res, rej)=>{
-         if(response < 400) return res(true)
-         else rej(false)
-       })
-       
-    };
-
-    signUp()
-        .then((res) => console.log("Success:", res))
-        .catch((err) => console.log("Failed:", err));
+    const dataSet = new FormData()
+    const name = "Adarsh"
+    const lastName = "Kushwaha"
+    dataSet.append("Name", name)
+    console.log(dataSet.entries)
 </script>
 
 </html>

@@ -1,14 +1,40 @@
-import multer from 'multer';
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
+
+const ensureDirExists = (dir) => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+};
 
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, './public/temp');
+  destination: (req, file, cb) => {
+    const uploadPath = path.join(__dirname, "../public/temp");
+    ensureDirExists(uploadPath);
+    cb(null, uploadPath);
   },
-  filename: function (req, file, cb) {
-    cb(null, file.originalname);
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    const baseName = path.basename(file.originalname, ext).replace(/\s+/g, "_");
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, `${baseName}-${uniqueSuffix}${ext}`);
   },
 });
 
-const upload = multer({ storage });
+const fileFilter = (req, file, cb) => {
+  const allowedMimeTypes = ["image/jpeg", "image/png", "image/gif"];
+  if (allowedMimeTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error("Invalid file type. Only images are allowed."));
+  }
+};
 
-export default upload;
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter,
+});
+
+module.exports = upload;

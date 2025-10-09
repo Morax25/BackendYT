@@ -5,10 +5,9 @@ import uploadOnCloudinary from '../utils/cloudinary.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import fs from 'fs';
 import jwt from 'jsonwebtoken';
-import { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } from '../constants.js';
+import { REFRESH_TOKEN_SECRET } from '../constants.js';
 
 //User Register
-
 export const registerUser = asyncHandler(async (req, res) => {
   const { fullName, email, username, password } = req.body;
 
@@ -64,7 +63,6 @@ export const registerUser = asyncHandler(async (req, res) => {
 });
 
 //User Login
-
 const generateActionAndRefreshToken = async (userId) => {
   try {
     const user = await User.findById(userId);
@@ -81,6 +79,7 @@ const generateActionAndRefreshToken = async (userId) => {
   }
 };
 
+//Login route
 export const userLogin = asyncHandler(async (req, res) => {
   const { email, username, password } = req.body;
   if (!username && !email)
@@ -126,7 +125,6 @@ export const userLogin = asyncHandler(async (req, res) => {
 });
 
 //Logout User
-
 export const logOutUser = asyncHandler(async (req, res) => {
   console.log('logout', req.user);
   const user = await User.findByIdAndUpdate(
@@ -152,8 +150,7 @@ export const logOutUser = asyncHandler(async (req, res) => {
 });
 
 //Refresh Access Token
-
-export const refreshAccessToken = async (req, res) => {
+export const refreshAccessToken = asyncHandler(async (req, res) => {
   const incomingRefreshToken =
     req?.cookies?.refreshToken || req?.body?.refreshToken;
   if (!incomingRefreshToken) {
@@ -191,4 +188,4 @@ export const refreshAccessToken = async (req, res) => {
   } catch (error) {
     throw new ApiError(401, error.message || 'Invalid refresh token');
   }
-};
+});
