@@ -191,7 +191,7 @@ function parseErrors(errorString) {
   const errors = {};
 
   errorString.split(',').forEach(entry => {
-    const [key, message] = entry.split(/:(.+)/); // split on first colon only
+    const [key, message] = entry.split(/:(.+)/);
     if (!key || !message) return;
 
     const field = key.trim();
@@ -207,7 +207,6 @@ function parseErrors(errorString) {
   return errors;
 }
 
-// Simplified validation middleware using ApiError
 export const validateRequest = (schema, source = 'body') => {
   return (req, res, next) => {
     try {
@@ -217,22 +216,24 @@ export const validateRequest = (schema, source = 'body') => {
           : source === 'params'
             ? req.params
             : req.body;
+      
       const validatedData = schema.parse(dataSource);
       req.validatedData = validatedData;
       next();
     } catch (error) {
       if (error instanceof z.ZodError) {
-        const errorMessage = error.issues
-          .map((err) => `${err.path.join('.')}: ${err.message}`)
-          .join(', ');
-        throw new ApiError(400, errorMessage, parseErrors(errorMessage))
+        const errors = error.issues.map((err) => ({
+          field: err.path.join('.'),
+          message: err.message
+        }));
+        
+        return next(new ApiError(400, 'Validation failed', errors));
       }
       return next(new ApiError(500, 'Validation error occurred'));
     }
   };
 };
 
-// Alternative: More detailed validation errors
 export const validateRequestDetailed = (schema, source = 'body') => {
   return (req, res, next) => {
     try {

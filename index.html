@@ -1,32 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
+
 <body>
-    
+
 </body>
 <script>
-    const signUp = async () =>{
-        const response = await fetch('http://localhost:8000/api/v1/users/register', {
-            method:"POST",
-            headers:{
-                'Content-type':'application/json',
-            },
-            body:JSON.stringify({
-              "username":"Adarsh1234",
-              "fullName":"Adarsh Kushwaha",
-              "email":"Adarsh@gmail.com",
-              "password":"Ak@123",
-              "avatar":""
-            })
-        }).json()
-    }
-    
-    signUp().then((res)=>(console.log("Register successfull", res))).catch((err)=>(console.log("Error while registering",err)))
+    const signUp = async () => {
+        response = 400
+       return new Promise((res, rej)=>{
+         if(response < 400) return res(true)
+         else rej(false)
+       })
+       
+    };
 
-    
+    signUp()
+        .then((res) => console.log("Success:", res))
+        .catch((err) => console.log("Failed:", err));
 </script>
+
 </html>

@@ -2,6 +2,7 @@
 import { Router } from 'express';
 import {
   logOutUser,
+  refreshAccessToken,
   registerUser,
   userLogin,
 } from '../controllers/user.controller.js';
@@ -12,7 +13,7 @@ import {validateRequest,userRegistrationSchema} from '../validators/user.validat
 const router = Router();
 
 router.post(
-  '/register', validateRequest(userRegistrationSchema),
+  '/register',
   upload.fields([
     {
       name: 'avatar',
@@ -30,5 +31,6 @@ router.post('/login', userLogin);
 //secure routes
 
 router.post('/logout', verifyJWT, logOutUser);
+router.post('/refresh-token', refreshAccessToken)
 
 export default router;
