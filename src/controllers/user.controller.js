@@ -5,7 +5,7 @@ import uploadOnCloudinary from '../utils/cloudinary.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import fs from 'fs';
 import jwt from 'jsonwebtoken';
-import { ACCESS_TOKEN_SECRET } from '../constants.js';
+import { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } from '../constants.js';
 
 //User Register
 
@@ -159,36 +159,36 @@ export const refreshAccessToken = async (req, res) => {
   if (!incomingRefreshToken) {
     throw new ApiError((400, 'Unauthorized request'));
   }
- try {
-   const decodedToken = jwt.verify({
-     incomingRefreshToken,
-     ACCESS_TOKEN_SECRET,
-   });
-   const user = await User.findById(decodedToken?._id);
-   if (!user) throw new ApiError(401, 'Invalid refresh token');
- 
-   if (incomingRefreshToken !== user?.refreshToken)
-     throw new ApiError(401, 'Refresh token is expired');
- 
-   const options = {
-     httpOnly: true,
-     secure: true,
-   };
- 
-   const { accessToken, newRefreshToken } = await generateActionAndRefreshToken(
-     user._id
-   );
-   res
-     .status(200)
-     .cookie('accessToken', accessToken)
-     .cookie('resfreshToken', newRefreshToken)
-     .json(
-       new ApiResponse(200, {
-         accessToken,
-         newRefreshToken,
-       }, "Access token refreshed successfully")
-     );
- } catch (error) {
-   throw new ApiError(401, error.message || "Invalid refresh token")
- }
+  try {
+    const decodedToken = jwt.verify(incomingRefreshToken, REFRESH_TOKEN_SECRET);
+    console.log('type', typeof decodedToken);
+    const user = await User.findById(decodedToken?._id);
+    if (!user) throw new ApiError(401, 'Invalid refresh token');
+    if (incomingRefreshToken !== user?.refreshToken)
+      throw new ApiError(401, 'Refresh token is expired');
+
+    const options = {
+      httpOnly: true,
+      secure: true,
+    };
+
+    const { accessToken, refreshToken: newRefreshToken } =
+      await generateActionAndRefreshToken(user._id);
+    res
+      .status(200)
+      .cookie('accessToken', accessToken)
+      .cookie('resfreshToken', newRefreshToken)
+      .json(
+        new ApiResponse(
+          200,
+          {
+            accessToken,
+            newRefreshToken,
+          },
+          'Access token refreshed successfully'
+        )
+      );
+  } catch (error) {
+    throw new ApiError(401, error.message || 'Invalid refresh token');
+  }
 };
