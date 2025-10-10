@@ -49,7 +49,6 @@ export const requireRole = (...roles) => {
 const extractToken = (req) => {
   const cookieToken = req.cookies?.accessToken;
   const headerToken = req.headers?.authorization?.replace(/^Bearer\s+/i, '');
-
   return cookieToken || headerToken || null;
 };
 
@@ -84,6 +83,5 @@ const fetchUserById = async (userId) => {
   const user = await User.findById(userId)
     .select('-password -refreshToken')
     .lean();
-
   return user;
 };

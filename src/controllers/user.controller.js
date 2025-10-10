@@ -189,3 +189,44 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
     throw new ApiError(401, error.message || 'Invalid refresh token');
   }
 });
+
+//Change Password
+export const changeCurrentPassword = asyncHandler(async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+  const user = await User.findById(req.user._id);
+  if (!user) throw new ApiError(400, 'Invalid token');
+  const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
+  if (!isPasswordCorrect) throw new ApiError(400, 'Incorrect password');
+  user.password = newPassword;
+  await user.save({ validateBeforeSave: false });
+  return res
+    .status(200)
+    .json(new ApiResponse(200, 'Password changed successfully'));
+});
+
+//getUser
+export const getUser = asyncHandler(async (req, res) => {
+  const user = await User.findById(req?.user?._id);
+  if (!user) throw new ApiError(400, 'user not found or has been deleted');
+  return res
+    .status(200)
+    .json(new ApiResponse(200, 'User found successfully', user));
+});
+
+//Update account details
+export const updateAccountDetails = asyncHandler(async(req, res)=> {
+  const {fullName, email} = req.body
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set:{
+        fullName,
+        email
+      }
+    }, {
+      new:true
+    }
+  ).select("-password -refreshToken")
+  if(!user) throw new ApiError(400, "User not found") 
+    return res.status(200).json(new ApiResponse(200, "Details updated successfully", user))
+})
