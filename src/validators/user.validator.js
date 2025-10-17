@@ -190,7 +190,7 @@ export const userQuerySchema = z.object({
 function parseErrors(errorString) {
   const errors = {};
 
-  errorString.split(',').forEach(entry => {
+  errorString.split(',').forEach((entry) => {
     const [key, message] = entry.split(/:(.+)/);
     if (!key || !message) return;
 
@@ -216,7 +216,7 @@ export const validateRequest = (schema, source = 'body') => {
           : source === 'params'
             ? req.params
             : req.body;
-      
+
       const validatedData = schema.parse(dataSource);
       req.validatedData = validatedData;
       next();
@@ -224,9 +224,9 @@ export const validateRequest = (schema, source = 'body') => {
       if (error instanceof z.ZodError) {
         const errors = error.issues.map((err) => ({
           field: err.path.join('.'),
-          message: err.message
+          message: err.message,
         }));
-        
+
         return next(new ApiError(400, 'Validation failed', errors));
       }
       return next(new ApiError(500, 'Validation error occurred'));
