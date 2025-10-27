@@ -7,9 +7,8 @@ import { REFRESH_TOKEN_SECRET } from '../constants.js';
 
 //User Register
 export const registerUser = asyncHandler(async (req, res) => {
-  const { fullName, email, username, password, avatar, cover } =
+  const { fullName, email, username, password, avatar, coverImage } =
     req.validatedData;
-
   const existingUser = await User.findOne({
     $or: [{ email }, { username }],
   });
@@ -22,7 +21,7 @@ export const registerUser = asyncHandler(async (req, res) => {
     fullName: fullName,
     email: email,
     avatar: avatar,
-    cover: cover?.url || '',
+    coverImage: coverImage,
     password: password,
     username: username.toLowerCase(),
   });
@@ -209,4 +208,65 @@ export const updateAccountDetails = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, 'Details updated successfully', user));
+});
+
+//Get user channel profile
+export const getUserChannelProfile = asyncHandler(async (req, res) => {
+  const { username } = req.params;
+  if (!username?.trim()) {
+    throw new ApiError(400, 'Please provide a valid username');
+  }
+  const userId = req.validatedData?._id;
+  console.log('this is user', await User.findOne({ username: username }));
+
+  const channel = await User.aggregate([
+    {
+      $match: { username: username.toLowerCase() },
+    },
+    {
+      $lookup: {
+        from: 'subscriptions',
+        localField: '_id',
+        foreignField: 'channel',
+        as: 'subscribers',
+      },
+    },
+    {
+      $lookup: {
+        from: 'subscriptions',
+        localField: '_id',
+        foreignField: 'subscriber',
+        as: 'subscribedTo',
+      },
+    },
+    {
+      $addFields: {
+        subscribersCount: { $size: '$subscribers' },
+        subscribedChannelCount: { $size: '$subscribedTo' },
+      },
+    },
+    {
+      $project: {
+        fullName: 1,
+        username: 1,
+        subscribersCount: 1,
+        subscribedChannelCount: 1,
+        avatar: 1,
+        coverImage: 1,
+        email: 1,
+      },
+    },
+  ]);
+
+  if (!channel?.length) throw new ApiError(404, 'Channel does not exist');
+
+  channel[0].isSubscribed = channel[0].subscribers?.some(
+    (s) => s.subscriber?.toString() === userId?.toString()
+  );
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, 'User channel fetched successfully', channel[0])
+    );
 });
