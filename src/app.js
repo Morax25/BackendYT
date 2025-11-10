@@ -29,7 +29,6 @@ import UserRouter from './routes/user.routes.js';
 
 app.use('/api/v1/users', UserRouter);
 
-
 app.use((err, req, res, next) => {
   console.error('🔥 Error caught:', err);
   if (err instanceof ApiError) {
@@ -46,7 +45,5 @@ app.use((err, req, res, next) => {
     stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
   });
 });
-
-
 
 export default app;

@@ -42,7 +42,7 @@ export const registerUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, 'User registered successfully', createdUser));
 });
 
-//User Login
+//Generate Refresh and Access Token
 const generateActionAndRefreshToken = async (userId) => {
   try {
     const user = await User.findById(userId);
@@ -59,7 +59,7 @@ const generateActionAndRefreshToken = async (userId) => {
   }
 };
 
-//Login route
+//User Login
 export const userLogin = asyncHandler(async (req, res) => {
   const { email, username, password } = req.body;
   if (!username && !email)
@@ -102,7 +102,7 @@ export const userLogin = asyncHandler(async (req, res) => {
 
 //Logout User
 export const logOutUser = asyncHandler(async (req, res) => {
-  console.log('logout', req.user);
+
   const user = await User.findByIdAndUpdate(
     req.user._id,
     {
@@ -209,9 +209,10 @@ export const updateAccountDetails = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, 'Details updated successfully', user));
 });
-
+ 
 //Get user channel profile
 export const getUserChannelProfile = asyncHandler(async (req, res) => {
+
   const { username } = req.params;
   if (!username?.trim()) {
     throw new ApiError(400, 'Please provide a valid username');

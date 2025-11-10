@@ -18,6 +18,8 @@ import {
 import { uploadFile } from '../controllers/fileUpload.controller.js';
 
 const router = Router();
+
+//User register and login routes
 router.post('/register', validateRequest(userRegistrationSchema), registerUser);
 router.post('/login', userLogin);
 
